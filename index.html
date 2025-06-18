@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Experience Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 16px;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding: 40px 0;
+            overflow-x: auto;
+            min-height: 200px;
+        }
+
+        .timeline {
+            position: relative;
+            height: 120px;
+            min-width: 800px;
+        }
+
+        .timeline-track {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .job-period {
+            position: absolute;
+            top: 40px;
+            height: 40px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            padding: 0 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .job-period:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .job-period.color-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .job-period.color-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .job-period.color-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .job-period.color-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .job-period.color-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .job-period.color-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+
+        .year-marker {
+            position: absolute;
+            top: 90px;
+            color: #666;
+            font-size: 12px;
+            font-weight: 400;
+            transform: translateX(-50%);
+        }
+
+        .job-tooltip {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .job-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(0,0,0,0.9);
+        }
+
+        .job-period:hover .job-tooltip {
+            opacity: 1;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            padding: 8px 12px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: white;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .job-list {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .job-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .job-info h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .job-info p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .status-indicator {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(67, 233, 123, 0.1);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            border-radius: 4px;
+            color: #43e97b;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .timeline-container {
+                padding: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Timeline</h1>
+            <p>Interactive Job Experience Timeline</p>
+        </div>
+
+        <div class="controls">
+            <div class="input-group">
+                <label>Company Name</label>
+                <input type="text" id="companyName" placeholder="Enter company name">
+            </div>
+            <div class="input-group">
+                <label>Start Date</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="input-group">
+                <label>End Date</label>
+                <input type="date" id="endDate">
+            </div>
+            <button class="add-btn" onclick="addJob()">Add Job</button>
+            <button class="add-btn" onclick="saveAsImage()" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">Save as Image</button>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline" id="timeline">
+                <div class="timeline-track"></div>
+            </div>
+        </div>
+
+        <div class="job-list" id="jobList"></div>
+        
+        <div class="status-indicator" id="status">
+            Add your first job experience to see the timeline!
+        </div>
+    </div>
+
+    <script>
+        let jobs = [
+            {
+                company: "Muso",
+                startDate: "2008-01-01",
+                endDate: "2010-06-01"
+            },
+            {
+                company: "Golden Submarine",
+                startDate: "2010-08-01",
+                endDate: "2012-03-01"
+            },
+            {
+                company: "Simple.Tv",
+                startDate: "2012-05-01",
+                endDate: "2016-12-01"
+            },
+            {
+                company: "To The End",
+                startDate: "2017-01-01",
+                endDate: "2018-08-01"
+            }
+        ];
+
+        const colors = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6'];
+
+        function parseDate(dateStr) {
+            return new Date(dateStr);
+        }
+
+        function formatDate(dateStr) {
+            const date = parseDate(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short' 
+            });
+        }
+
+        function calculateDuration(startDate, endDate) {
+            const start = parseDate(startDate);
+            const end = parseDate(endDate);
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const years = Math.floor(diffDays / 365);
+            const months = Math.floor((diffDays % 365) / 30);
+            
+            if (years > 0 && months > 0) {
+                return `${years}y ${months}m`;
+            } else if (years > 0) {
+                return `${years}y`;
+            } else {
+                return `${months}m`;
+            }
+        }
+
+        function renderTimeline() {
+            const timeline = document.getElementById('timeline');
+            const status = document.getElementById('status');
+            
+            if (jobs.length === 0) {
+                timeline.innerHTML = '<div class="timeline-track"></div>';
+                status.textContent = 'Add your first job experience to see the timeline!';
+                return;
+            }
+
+            // Find date range
+            const allDates = jobs.flatMap(job => [parseDate(job.startDate), parseDate(job.endDate)]);
+            const minDate = new Date(Math.min(...allDates));
+            const maxDate = new Date(Math.max(...allDates));
+            
+            // Add some padding to the date range
+            const dateRange = maxDate - minDate;
+            const paddedMinDate = new Date(minDate.getTime() - dateRange * 0.1);
+            const paddedMaxDate = new Date(maxDate.getTime() + dateRange * 0.1);
+            const totalRange = paddedMaxDate - paddedMinDate;
+
+            let timelineHTML = '<div class="timeline-track"></div>';
+
+            // Add year markers
+            const startYear = paddedMinDate.getFullYear();
+            const endYear = paddedMaxDate.getFullYear();
+            
+            for (let year = startYear; year <= endYear; year++) {
+                const yearDate = new Date(year, 0, 1);
+                const position = ((yearDate - paddedMinDate) / totalRange) * 100;
+                if (position >= 0 && position <= 100) {
+                    timelineHTML += `
+                        <div class="year-marker" style="left: ${position}%">
+                            ${year}
+                        </div>
+                    `;
+                }
+            }
+
+            // Add job periods
+            jobs.forEach((job, index) => {
+                const startDate = parseDate(job.startDate);
+                const endDate = parseDate(job.endDate);
+                
+                const startPosition = ((startDate - paddedMinDate) / totalRange) * 100;
+                const endPosition = ((endDate - paddedMinDate) / totalRange) * 100;
+                const width = endPosition - startPosition;
+                
+                const colorClass = colors[index % colors.length];
+                const duration = calculateDuration(job.startDate, job.endDate);
+                
+                timelineHTML += `
+                    <div class="job-period ${colorClass}" 
+                         style="left: ${startPosition}%; width: ${width}%">
+                        ${job.company}
+                        <div class="job-tooltip">
+                            <strong>${job.company}</strong><br>
+                            ${formatDate(job.startDate)} - ${formatDate(job.endDate)}<br>
+                            Duration: ${duration}
+                        </div>
+                    </div>
+                `;
+            });
+
+            timeline.innerHTML = timelineHTML;
+            status.textContent = `Timeline displaying ${jobs.length} job experience${jobs.length !== 1 ? 's' : ''}`;
+        }
+
+        function renderJobList() {
+            const jobList = document.getElementById('jobList');
+            
+            if (jobs.length === 0) {
+                jobList.innerHTML = '';
+                return;
+            }
+
+            const jobListHTML = jobs.map((job, index) => `
+                <div class="job-item">
+                    <div class="job-info">
+                        <h3>${job.company}</h3>
+                        <p>${formatDate(job.startDate)} - ${formatDate(job.endDate)} (${calculateDuration(job.startDate, job.endDate)})</p>
+                    </div>
+                    <button class="delete-btn" onclick="deleteJob(${index})">Delete</button>
+                </div>
+            `).join('');
+
+            jobList.innerHTML = jobListHTML;
+        }
+
+        function addJob() {
+            const companyName = document.getElementById('companyName').value.trim();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!companyName || !startDate || !endDate) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (parseDate(startDate) >= parseDate(endDate)) {
+                alert('End date must be after start date');
+                return;
+            }
+
+            jobs.push({
+                company: companyName,
+                startDate: startDate,
+                endDate: endDate
+            });
+
+            // Clear form
+            document.getElementById('companyName').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+
+            // Sort jobs by start date
+            jobs.sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
+
+            renderTimeline();
+            renderJobList();
+        }
+
+        function deleteJob(index) {
+            jobs.splice(index, 1);
+            renderTimeline();
+            renderJobList();
+        }
+
+        // Initialize with sample data
+        renderTimeline();
+        renderJobList();
+
+        // Handle Enter key in form inputs
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.matches('#companyName, #startDate, #endDate')) {
+                addJob();
+            }
+        });
+
+        // Save timeline as image
+        function saveAsImage() {
+            const timeline = document.getElementById('timeline');
+            const container = timeline.parentElement;
+            
+            if (jobs.length === 0) {
+                alert('Please add some job experiences first!');
+                return;
+            }
+
+            // Create a temporary canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions (higher resolution for better quality)
+            const scale = 2;
+            canvas.width = 1200 * scale;
+            canvas.height = 400 * scale;
+            
+            // Scale the context for high-DPI rendering
+            ctx.scale(scale, scale);
+            
+            // Fill background
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, 1200, 400);
+            
+            // Add title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '24px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('JOB EXPERIENCE TIMELINE', 50, 50);
+            
+            // Timeline area
+            const timelineY = 200;
+            const timelineHeight = 4;
+            const timelineStart = 50;
+            const timelineEnd = 1150;
+            const timelineWidth = timelineEnd - timelineStart;
+            
+            // Draw timeline track
+            ctx.fillStyle = '#333';
+            ctx.fillRect(timelineStart, timelineY, timelineWidth, timelineHeight);
+            
+            if (jobs.length > 0) {
+                // Calculate date range
+                const allDates = jobs.flatMap(job => [parseDate(job.startDate), parseDate(job.endDate)]);
+                const minDate = new Date(Math.min(...allDates));
+                const maxDate = new Date(Math.max(...allDates));
+                
+                // Add padding to date range
+                const dateRange = maxDate - minDate;
+                const paddedMinDate = new Date(minDate.getTime() - dateRange * 0.1);
+                const paddedMaxDate = new Date(maxDate.getTime() + dateRange * 0.1);
+                const totalRange = paddedMaxDate - paddedMinDate;
+                
+                // Draw year markers
+                const startYear = paddedMinDate.getFullYear();
+                const endYear = paddedMaxDate.getFullYear();
+                
+                ctx.fillStyle = '#666';
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                
+                for (let year = startYear; year <= endYear; year++) {
+                    const yearDate = new Date(year, 0, 1);
+                    const position = ((yearDate - paddedMinDate) / totalRange) * timelineWidth + timelineStart;
+                    if (position >= timelineStart && position <= timelineEnd) {
+                        ctx.fillText(year.toString(), position, timelineY + 30);
+                    }
+                }
+                
+                // Define gradient colors (approximations for canvas)
+                const gradientColors = [
+                    ['#667eea', '#764ba2'],
+                    ['#f093fb', '#f5576c'],
+                    ['#4facfe', '#00f2fe'],
+                    ['#43e97b', '#38f9d7'],
+                    ['#fa709a', '#fee140'],
+                    ['#a8edea', '#fed6e3']
+                ];
+                
+                // Draw job periods
+                jobs.forEach((job, index) => {
+                    const startDate = parseDate(job.startDate);
+                    const endDate = parseDate(job.endDate);
+                    
+                    const startPosition = ((startDate - paddedMinDate) / totalRange) * timelineWidth + timelineStart;
+                    const endPosition = ((endDate - paddedMinDate) / totalRange) * timelineWidth + timelineStart;
+                    const width = endPosition - startPosition;
+                    
+                    // Ensure minimum width for visibility
+                    const actualWidth = Math.max(width, 60);
+                    
+                    // Create gradient
+                    const colors = gradientColors[index % gradientColors.length];
+                    const gradient = ctx.createLinearGradient(startPosition, 0, startPosition + actualWidth, 0);
+                    gradient.addColorStop(0, colors[0]);
+                    gradient.addColorStop(1, colors[1]);
+                    
+                    // Draw job period rectangle
+                    const rectY = timelineY - 18;
+                    const rectHeight = 40;
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(startPosition, rectY, actualWidth, rectHeight);
+                    
+                    // Add rounded corners effect (simplified)
+                    ctx.beginPath();
+                    ctx.roundRect(startPosition, rectY, actualWidth, rectHeight, 20);
+                    ctx.fill();
+                    
+                    // Add job label
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(job.company, startPosition + actualWidth / 2, timelineY + 5);
+                    
+                    // Add duration info below
+                    const duration = calculateDuration(job.startDate, job.endDate);
+                    ctx.font = '10px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
+                    ctx.fillStyle = '#cccccc';
+                    ctx.fillText(`${formatDate(job.startDate)} - ${formatDate(job.endDate)}`, startPosition + actualWidth / 2, timelineY + 60);
+                    ctx.fillText(`(${duration})`, startPosition + actualWidth / 2, timelineY + 75);
+                });
+            }
+            
+            // Add watermark/footer
+            ctx.fillStyle = '#666';
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(`Generated on ${new Date().toLocaleDateString()}`, 1150, 380);
+            
+            // Convert canvas to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `job-timeline-${new Date().toISOString().split('T')[0]}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        }
+
+        // Polyfill for roundRect if not supported
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+    </script>
+</body>
+</html>
