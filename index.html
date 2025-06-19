@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Experience Timeline-TEST</title>
+    <title>Job Experience Timeline</title>
     <style>
         * {
             margin: 0;
@@ -39,100 +39,6 @@
         .header p {
             color: #888;
             font-size: 16px;
-        }
-
-        .timeline-container {
-            position: relative;
-            padding: 40px 0;
-            overflow-x: auto;
-            min-height: 200px;
-        }
-
-        .timeline {
-            position: relative;
-            height: 120px;
-            min-width: 800px;
-        }
-
-        .timeline-track {
-            position: absolute;
-            top: 60px;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-        }
-
-        .job-period {
-            position: absolute;
-            top: 40px;
-            height: 40px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 80px;
-            font-size: 12px;
-            font-weight: 500;
-            text-align: center;
-            padding: 0 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .job-period:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-        }
-
-        .job-period.color-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .job-period.color-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .job-period.color-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .job-period.color-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .job-period.color-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .job-period.color-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-
-        .year-marker {
-            position: absolute;
-            top: 90px;
-            color: #666;
-            font-size: 12px;
-            font-weight: 400;
-            transform: translateX(-50%);
-        }
-
-        .job-tooltip {
-            position: absolute;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .job-tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: rgba(0,0,0,0.9);
-        }
-
-        .job-period:hover .job-tooltip {
-            opacity: 1;
         }
 
         .controls {
@@ -187,6 +93,218 @@
             transform: translateY(-2px);
         }
 
+        .project-controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: none;
+        }
+
+        .project-controls.active {
+            display: block;
+        }
+
+        .project-controls h3 {
+            margin-bottom: 15px;
+            color: #43e97b;
+            font-size: 18px;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding: 40px 0;
+            overflow-x: auto;
+            min-height: 200px;
+        }
+
+        .timeline {
+            position: relative;
+            height: 120px;
+            min-width: 800px;
+        }
+
+        .timeline-track {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .job-period {
+            position: absolute;
+            top: 40px;
+            height: 40px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            padding: 0 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 2px solid transparent;
+        }
+
+        .job-period:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .job-period.expanded {
+            border-color: #fff;
+            box-shadow: 0 8px 25px rgba(255,255,255,0.2);
+        }
+
+        .job-period.has-projects::after {
+            content: '▼';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: #888;
+            transition: transform 0.3s ease;
+        }
+
+        .job-period.expanded::after {
+            transform: translateX(-50%) rotate(180deg);
+        }
+
+        .job-period.color-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .job-period.color-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .job-period.color-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .job-period.color-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .job-period.color-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .job-period.color-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+
+        .year-marker {
+            position: absolute;
+            top: 90px;
+            color: #666;
+            font-size: 12px;
+            font-weight: 400;
+            transform: translateX(-50%);
+        }
+
+        .job-tooltip {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .job-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(0,0,0,0.9);
+        }
+
+        .job-period:hover .job-tooltip {
+            opacity: 1;
+        }
+
+        .project-timeline {
+            position: absolute;
+            top: 100px;
+            height: 60px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            min-width: 200px;
+            padding: 8px;
+            overflow: hidden;
+        }
+
+        .project-timeline.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .project-item {
+            position: absolute;
+            top: 20px;
+            height: 20px;
+            background: rgba(255,255,255,0.8);
+            color: #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 500;
+            min-width: 40px;
+            padding: 0 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .project-item:hover {
+            background: rgba(255,255,255,1);
+            transform: translateY(-2px);
+        }
+
+        .project-tooltip {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+
+        .project-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: rgba(0,0,0,0.9);
+        }
+
+        .project-item:hover .project-tooltip {
+            opacity: 1;
+        }
+
         .job-list {
             margin-top: 30px;
             display: grid;
@@ -199,9 +317,57 @@
             padding: 15px;
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .job-item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+        }
+
+        .job-item.expanded {
+            border-color: rgba(67, 233, 123, 0.3);
+        }
+
+        .job-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .project-list {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: none;
+        }
+
+        .project-list.visible {
+            display: block;
+        }
+
+        .project-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.03);
+            border-radius: 4px;
+            border-left: 3px solid #43e97b;
+        }
+
+        .project-list-item .project-info h4 {
+            font-size: 14px;
+            margin-bottom: 2px;
+            color: #fff;
+        }
+
+        .project-list-item .project-info p {
+            font-size: 12px;
+            color: #888;
         }
 
         .job-info h3 {
@@ -222,6 +388,28 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
+        }
+
+        .add-project-btn {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .expand-btn {
+            background: #43e97b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
         }
 
         .status-indicator {
@@ -271,6 +459,26 @@
             <button class="add-btn" onclick="saveAsImage()" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">Save as Image</button>
         </div>
 
+        <div class="project-controls" id="projectControls">
+            <h3>Add Project to <span id="selectedJobName">Selected Job</span></h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+                <div class="input-group">
+                    <label>Project Name</label>
+                    <input type="text" id="projectName" placeholder="Enter project name">
+                </div>
+                <div class="input-group">
+                    <label>Start Date</label>
+                    <input type="date" id="projectStartDate">
+                </div>
+                <div class="input-group">
+                    <label>End Date</label>
+                    <input type="date" id="projectEndDate">
+                </div>
+                <button class="add-btn" onclick="addProject()" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); margin-top: 20px;">Add Project</button>
+                <button class="add-btn" onclick="closeProjectControls()" style="background: #666; margin-top: 20px;">Close</button>
+            </div>
+        </div>
+
         <div class="timeline-container">
             <div class="timeline" id="timeline">
                 <div class="timeline-track"></div>
@@ -280,36 +488,58 @@
         <div class="job-list" id="jobList"></div>
         
         <div class="status-indicator" id="status">
-            Add your first job experience to see the timeline!
+            Timeline ready! Sample data loaded.
         </div>
     </div>
 
     <script>
+        // Sample data
         let jobs = [
             {
                 company: "Muso",
                 startDate: "2008-01-01",
-                endDate: "2010-06-01"
+                endDate: "2010-06-01",
+                projects: [
+                    { name: "Website Redesign", startDate: "2008-02-01", endDate: "2008-06-01" },
+                    { name: "Mobile App", startDate: "2008-07-01", endDate: "2009-03-01" },
+                    { name: "Data Migration", startDate: "2009-04-01", endDate: "2010-01-01" }
+                ]
             },
             {
                 company: "Golden Submarine",
                 startDate: "2010-08-01",
-                endDate: "2012-03-01"
+                endDate: "2012-03-01",
+                projects: [
+                    { name: "E-commerce Platform", startDate: "2010-09-01", endDate: "2011-06-01" },
+                    { name: "Payment Integration", startDate: "2011-07-01", endDate: "2012-01-01" }
+                ]
             },
             {
                 company: "Simple.Tv",
                 startDate: "2012-05-01",
-                endDate: "2016-12-01"
+                endDate: "2016-12-01",
+                projects: [
+                    { name: "Streaming Service", startDate: "2012-06-01", endDate: "2014-12-01" },
+                    { name: "Analytics Dashboard", startDate: "2015-01-01", endDate: "2015-08-01" },
+                    { name: "API Development", startDate: "2015-09-01", endDate: "2016-11-01" }
+                ]
             },
             {
                 company: "To The End",
                 startDate: "2017-01-01",
-                endDate: "2018-08-01"
+                endDate: "2018-08-01",
+                projects: [
+                    { name: "Cloud Migration", startDate: "2017-02-01", endDate: "2017-10-01" },
+                    { name: "Security Audit", startDate: "2017-11-01", endDate: "2018-05-01" }
+                ]
             }
         ];
 
+        let selectedJobIndex = -1;
+        let expandedJobs = new Set();
         const colors = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6'];
 
+        // Utility functions
         function parseDate(dateStr) {
             return new Date(dateStr);
         }
@@ -339,6 +569,7 @@
             }
         }
 
+        // Timeline rendering
         function renderTimeline() {
             const timeline = document.getElementById('timeline');
             const status = document.getElementById('status');
@@ -349,12 +580,10 @@
                 return;
             }
 
-            // Find date range
             const allDates = jobs.flatMap(job => [parseDate(job.startDate), parseDate(job.endDate)]);
             const minDate = new Date(Math.min(...allDates));
             const maxDate = new Date(Math.max(...allDates));
             
-            // Add some padding to the date range
             const dateRange = maxDate - minDate;
             const paddedMinDate = new Date(minDate.getTime() - dateRange * 0.1);
             const paddedMaxDate = new Date(maxDate.getTime() + dateRange * 0.1);
@@ -370,11 +599,7 @@
                 const yearDate = new Date(year, 0, 1);
                 const position = ((yearDate - paddedMinDate) / totalRange) * 100;
                 if (position >= 0 && position <= 100) {
-                    timelineHTML += `
-                        <div class="year-marker" style="left: ${position}%">
-                            ${year}
-                        </div>
-                    `;
+                    timelineHTML += `<div class="year-marker" style="left: ${position}%">${year}</div>`;
                 }
             }
 
@@ -389,24 +614,76 @@
                 
                 const colorClass = colors[index % colors.length];
                 const duration = calculateDuration(job.startDate, job.endDate);
+                const hasProjects = job.projects && job.projects.length > 0;
+                const isExpanded = expandedJobs.has(index);
                 
                 timelineHTML += `
-                    <div class="job-period ${colorClass}" 
-                         style="left: ${startPosition}%; width: ${width}%">
+                    <div class="job-period ${colorClass} ${hasProjects ? 'has-projects' : ''} ${isExpanded ? 'expanded' : ''}" 
+                         style="left: ${startPosition}%; width: ${width}%"
+                         onclick="toggleJobExpansion(${index})">
                         ${job.company}
                         <div class="job-tooltip">
                             <strong>${job.company}</strong><br>
                             ${formatDate(job.startDate)} - ${formatDate(job.endDate)}<br>
-                            Duration: ${duration}
+                            Duration: ${duration}${hasProjects ? '<br>Click to view projects' : ''}
                         </div>
                     </div>
                 `;
+
+                // Add project timeline if expanded
+                if (isExpanded && hasProjects) {
+                    timelineHTML += renderProjectTimeline(job, startPosition, width);
+                }
             });
 
             timeline.innerHTML = timelineHTML;
             status.textContent = `Timeline displaying ${jobs.length} job experience${jobs.length !== 1 ? 's' : ''}`;
         }
 
+        function renderProjectTimeline(job, jobStartPosition, jobWidth) {
+            if (!job.projects || job.projects.length === 0) return '';
+
+            const jobStartDate = parseDate(job.startDate);
+            const jobEndDate = parseDate(job.endDate);
+            const jobDuration = jobEndDate - jobStartDate;
+
+            let projectHTML = `<div class="project-timeline visible" style="left: ${jobStartPosition}%; width: ${jobWidth}%">`;
+
+            job.projects.forEach((project) => {
+                const projectStart = parseDate(project.startDate);
+                const projectEnd = parseDate(project.endDate);
+                
+                const relativeStart = ((projectStart - jobStartDate) / jobDuration) * 100;
+                const relativeEnd = ((projectEnd - jobStartDate) / jobDuration) * 100;
+                const relativeWidth = Math.max(relativeEnd - relativeStart, 15);
+                const projectDuration = calculateDuration(project.startDate, project.endDate);
+
+                projectHTML += `
+                    <div class="project-item" style="left: ${relativeStart}%; width: ${relativeWidth}%">
+                        ${project.name}
+                        <div class="project-tooltip">
+                            <strong>${project.name}</strong><br>
+                            ${formatDate(project.startDate)} - ${formatDate(project.endDate)}<br>
+                            Duration: ${projectDuration}
+                        </div>
+                    </div>
+                `;
+            });
+
+            projectHTML += '</div>';
+            return projectHTML;
+        }
+
+        function toggleJobExpansion(jobIndex) {
+            if (expandedJobs.has(jobIndex)) {
+                expandedJobs.delete(jobIndex);
+            } else {
+                expandedJobs.add(jobIndex);
+            }
+            renderTimeline();
+        }
+
+        // Job list rendering
         function renderJobList() {
             const jobList = document.getElementById('jobList');
             
@@ -415,19 +692,139 @@
                 return;
             }
 
-            const jobListHTML = jobs.map((job, index) => `
-                <div class="job-item">
-                    <div class="job-info">
-                        <h3>${job.company}</h3>
-                        <p>${formatDate(job.startDate)} - ${formatDate(job.endDate)} (${calculateDuration(job.startDate, job.endDate)})</p>
+            const jobListHTML = jobs.map((job, index) => {
+                const projectCount = job.projects ? job.projects.length : 0;
+                const isExpanded = expandedJobs.has(index);
+                
+                let projectListHTML = '';
+                if (job.projects && job.projects.length > 0) {
+                    projectListHTML = `
+                        <div class="project-list ${isExpanded ? 'visible' : ''}">
+                            ${job.projects.map((project, projectIndex) => `
+                                <div class="project-list-item">
+                                    <div class="project-info">
+                                        <h4>${project.name}</h4>
+                                        <p>${formatDate(project.startDate)} - ${formatDate(project.endDate)} (${calculateDuration(project.startDate, project.endDate)})</p>
+                                    </div>
+                                    <button class="delete-btn" onclick="deleteProject(${index}, ${projectIndex})">Delete</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="job-item ${isExpanded ? 'expanded' : ''}">
+                        <div class="job-item-header" onclick="toggleJobListExpansion(${index})">
+                            <div class="job-info">
+                                <h3>${job.company}</h3>
+                                <p>${formatDate(job.startDate)} - ${formatDate(job.endDate)} (${calculateDuration(job.startDate, job.endDate)})${projectCount > 0 ? ` • ${projectCount} project${projectCount !== 1 ? 's' : ''}` : ''}</p>
+                            </div>
+                            <div class="job-actions">
+                                <button class="add-project-btn" onclick="event.stopPropagation(); showProjectControls(${index})">Add Project</button>
+                                ${projectCount > 0 ? `<button class="expand-btn" onclick="event.stopPropagation(); toggleJobListExpansion(${index})">${isExpanded ? 'Collapse' : 'Expand'}</button>` : ''}
+                                <button class="delete-btn" onclick="event.stopPropagation(); deleteJob(${index})">Delete</button>
+                            </div>
+                        </div>
+                        ${projectListHTML}
                     </div>
-                    <button class="delete-btn" onclick="deleteJob(${index})">Delete</button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             jobList.innerHTML = jobListHTML;
         }
 
+        function toggleJobListExpansion(jobIndex) {
+            if (expandedJobs.has(jobIndex)) {
+                expandedJobs.delete(jobIndex);
+            } else {
+                expandedJobs.add(jobIndex);
+            }
+            renderJobList();
+            renderTimeline();
+        }
+
+        // Project management
+        function showProjectControls(jobIndex) {
+            selectedJobIndex = jobIndex;
+            const controls = document.getElementById('projectControls');
+            const jobName = document.getElementById('selectedJobName');
+            
+            jobName.textContent = jobs[jobIndex].company;
+            controls.classList.add('active');
+            
+            const jobStartDate = jobs[jobIndex].startDate;
+            const jobEndDate = jobs[jobIndex].endDate;
+            
+            document.getElementById('projectStartDate').min = jobStartDate;
+            document.getElementById('projectStartDate').max = jobEndDate;
+            document.getElementById('projectEndDate').min = jobStartDate;
+            document.getElementById('projectEndDate').max = jobEndDate;
+        }
+
+        function closeProjectControls() {
+            selectedJobIndex = -1;
+            document.getElementById('projectControls').classList.remove('active');
+            
+            document.getElementById('projectName').value = '';
+            document.getElementById('projectStartDate').value = '';
+            document.getElementById('projectEndDate').value = '';
+        }
+
+        function addProject() {
+            if (selectedJobIndex === -1) return;
+
+            const projectName = document.getElementById('projectName').value.trim();
+            const startDate = document.getElementById('projectStartDate').value;
+            const endDate = document.getElementById('projectEndDate').value;
+
+            if (!projectName || !startDate || !endDate) {
+                alert('Please fill in all project fields');
+                return;
+            }
+
+            if (parseDate(startDate) >= parseDate(endDate)) {
+                alert('Project end date must be after start date');
+                return;
+            }
+
+            const job = jobs[selectedJobIndex];
+            const jobStart = parseDate(job.startDate);
+            const jobEnd = parseDate(job.endDate);
+            const projectStart = parseDate(startDate);
+            const projectEnd = parseDate(endDate);
+
+            if (projectStart < jobStart || projectEnd > jobEnd) {
+                alert('Project dates must be within the job period');
+                return;
+            }
+
+            if (!job.projects) {
+                job.projects = [];
+            }
+
+            job.projects.push({
+                name: projectName,
+                startDate: startDate,
+                endDate: endDate
+            });
+
+            job.projects.sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
+
+            closeProjectControls();
+            renderTimeline();
+            renderJobList();
+        }
+
+        function deleteProject(jobIndex, projectIndex) {
+            if (jobs[jobIndex] && jobs[jobIndex].projects) {
+                jobs[jobIndex].projects.splice(projectIndex, 1);
+                renderTimeline();
+                renderJobList();
+            }
+        }
+
+        // Job management
         function addJob() {
             const companyName = document.getElementById('companyName').value.trim();
             const startDate = document.getElementById('startDate').value;
@@ -446,15 +843,14 @@
             jobs.push({
                 company: companyName,
                 startDate: startDate,
-                endDate: endDate
+                endDate: endDate,
+                projects: []
             });
 
-            // Clear form
             document.getElementById('companyName').value = '';
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
 
-            // Sort jobs by start date
             jobs.sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
 
             renderTimeline();
@@ -463,77 +859,64 @@
 
         function deleteJob(index) {
             jobs.splice(index, 1);
+            expandedJobs.delete(index);
+            
+            const newExpandedJobs = new Set();
+            expandedJobs.forEach(jobIndex => {
+                if (jobIndex > index) {
+                    newExpandedJobs.add(jobIndex - 1);
+                } else if (jobIndex < index) {
+                    newExpandedJobs.add(jobIndex);
+                }
+            });
+            expandedJobs = newExpandedJobs;
+            
             renderTimeline();
             renderJobList();
         }
 
-        // Initialize with sample data
-        renderTimeline();
-        renderJobList();
-
-        // Handle Enter key in form inputs
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && e.target.matches('#companyName, #startDate, #endDate')) {
-                addJob();
-            }
-        });
-
-        // Save timeline as image
+        // Image export
         function saveAsImage() {
-            const timeline = document.getElementById('timeline');
-            const container = timeline.parentElement;
-            
             if (jobs.length === 0) {
                 alert('Please add some job experiences first!');
                 return;
             }
 
-            // Create a temporary canvas
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas dimensions (higher resolution for better quality)
             const scale = 2;
             canvas.width = 1200 * scale;
             canvas.height = 400 * scale;
             
-            // Scale the context for high-DPI rendering
             ctx.scale(scale, scale);
             
-            // Fill background
             ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(0, 0, 1200, 400);
             
-            // Add title
             ctx.fillStyle = '#ffffff';
             ctx.font = '24px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText('JOB EXPERIENCE TIMELINE', 50, 50);
             
-            // Timeline area
             const timelineY = 200;
-            const timelineHeight = 4;
             const timelineStart = 50;
             const timelineEnd = 1150;
             const timelineWidth = timelineEnd - timelineStart;
             
-            // Draw timeline track
             ctx.fillStyle = '#333';
-            ctx.fillRect(timelineStart, timelineY, timelineWidth, timelineHeight);
+            ctx.fillRect(timelineStart, timelineY, timelineWidth, 4);
             
             if (jobs.length > 0) {
-                // Calculate date range
                 const allDates = jobs.flatMap(job => [parseDate(job.startDate), parseDate(job.endDate)]);
                 const minDate = new Date(Math.min(...allDates));
                 const maxDate = new Date(Math.max(...allDates));
                 
-                // Add padding to date range
                 const dateRange = maxDate - minDate;
                 const paddedMinDate = new Date(minDate.getTime() - dateRange * 0.1);
                 const paddedMaxDate = new Date(maxDate.getTime() + dateRange * 0.1);
                 const totalRange = paddedMaxDate - paddedMinDate;
                 
-                // Draw year markers
                 const startYear = paddedMinDate.getFullYear();
                 const endYear = paddedMaxDate.getFullYear();
                 
@@ -549,7 +932,6 @@
                     }
                 }
                 
-                // Define gradient colors (approximations for canvas)
                 const gradientColors = [
                     ['#667eea', '#764ba2'],
                     ['#f093fb', '#f5576c'],
@@ -559,7 +941,6 @@
                     ['#a8edea', '#fed6e3']
                 ];
                 
-                // Draw job periods
                 jobs.forEach((job, index) => {
                     const startDate = parseDate(job.startDate);
                     const endDate = parseDate(job.endDate);
@@ -568,34 +949,24 @@
                     const endPosition = ((endDate - paddedMinDate) / totalRange) * timelineWidth + timelineStart;
                     const width = endPosition - startPosition;
                     
-                    // Ensure minimum width for visibility
                     const actualWidth = Math.max(width, 60);
                     
-                    // Create gradient
                     const colors = gradientColors[index % gradientColors.length];
                     const gradient = ctx.createLinearGradient(startPosition, 0, startPosition + actualWidth, 0);
                     gradient.addColorStop(0, colors[0]);
                     gradient.addColorStop(1, colors[1]);
                     
-                    // Draw job period rectangle
                     const rectY = timelineY - 18;
                     const rectHeight = 40;
                     
                     ctx.fillStyle = gradient;
                     ctx.fillRect(startPosition, rectY, actualWidth, rectHeight);
                     
-                    // Add rounded corners effect (simplified)
-                    ctx.beginPath();
-                    ctx.roundRect(startPosition, rectY, actualWidth, rectHeight, 20);
-                    ctx.fill();
-                    
-                    // Add job label
                     ctx.fillStyle = '#ffffff';
                     ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.fillText(job.company, startPosition + actualWidth / 2, timelineY + 5);
                     
-                    // Add duration info below
                     const duration = calculateDuration(job.startDate, job.endDate);
                     ctx.font = '10px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
                     ctx.fillStyle = '#cccccc';
@@ -604,13 +975,11 @@
                 });
             }
             
-            // Add watermark/footer
             ctx.fillStyle = '#666';
             ctx.font = '10px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
             ctx.textAlign = 'right';
             ctx.fillText(`Generated on ${new Date().toLocaleDateString()}`, 1150, 380);
             
-            // Convert canvas to blob and download
             canvas.toBlob(function(blob) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -623,22 +992,16 @@
             }, 'image/png');
         }
 
-        // Polyfill for roundRect if not supported
-        if (!CanvasRenderingContext2D.prototype.roundRect) {
-            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
-                this.beginPath();
-                this.moveTo(x + radius, y);
-                this.lineTo(x + width - radius, y);
-                this.quadraticCurveTo(x + width, y, x + width, y + radius);
-                this.lineTo(x + width, y + height - radius);
-                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-                this.lineTo(x + radius, y + height);
-                this.quadraticCurveTo(x, y + height, x, y + height - radius);
-                this.lineTo(x, y + radius);
-                this.quadraticCurveTo(x, y, x + radius, y);
-                this.closePath();
-            };
-        }
+        // Event listeners
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.matches('#companyName, #startDate, #endDate')) {
+                addJob();
+            }
+        });
+
+        // Initialize
+        renderTimeline();
+        renderJobList();
     </script>
 </body>
 </html>
